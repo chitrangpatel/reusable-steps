@@ -1,0 +1,236 @@
+status:
+  completionTime: "2023-03-21T13:56:42Z"
+  conditions:
+  - lastTransitionTime: "2023-03-21T13:56:42Z"
+    message: All Steps have completed executing
+    reason: Succeeded
+    status: "True"
+    type: Succeeded
+  podName: clone-build-and-push-run-pod
+  results:
+  - name: IMAGE_DIGEST
+    type: string
+    value: sha256:6595d76b135b55b8a15cf31fefc2260ff6624e7e548eaf1728836598bc5a0371
+  startTime: "2023-03-21T13:56:31Z"
+  steps:
+  - container: step-clone
+    imageID: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init@sha256:28ff94e63e4058afc3f15b4c11c08cf3b54fa91faa646a4bbac90380cd7158df
+    name: clone
+    terminated:
+      containerID: containerd://6aa0a4b12718b7c17ad2b4af04688b7486c8f7b045c7c1e6325d43e518920ed0
+      exitCode: 0
+      finishedAt: "2023-03-21T13:56:38Z"
+      message: '[{"key":"commit","value":"15a1a4dd660885b364c0910669b9279a7cc3eca6"},{"key":"url","value":"https://github.com/chitrangpatel/reusable-steps.git"}]'
+      reason: Completed
+      startedAt: "2023-03-21T13:56:38Z"
+  - container: step-build-and-push
+    imageID: gcr.io/kaniko-project/executor@sha256:c6166717f7fe0b7da44908c986137ecfeab21f31ec3992f6e128fff8a94be8a5
+    name: build-and-push
+    terminated:
+      containerID: containerd://b0556e5493875e388bc4e3700966a81889c9f18cdc788bc636d42e66fd31eda6
+      exitCode: 0
+      finishedAt: "2023-03-21T13:56:41Z"
+      message: '[{"key":"IMAGE_DIGEST","value":"sha256:6595d76b135b55b8a15cf31fefc2260ff6624e7e548eaf1728836598bc5a0371","type":1}]'
+      reason: Completed
+      startedAt: "2023-03-21T13:56:39Z"
+  taskSpec:
+    params:
+    - description: Name (reference) of the image to build.
+      name: IMAGE
+      type: string
+    - default: ./Dockerfile
+      description: Path to the Dockerfile to build.
+      name: DOCKERFILE
+      type: string
+    - default: ./
+      description: The build context used by Kaniko.
+      name: CONTEXT
+      type: string
+    - default: []
+      name: EXTRA_ARGS
+      type: array
+    - default: gcr.io/kaniko-project/executor:v1.5.1@sha256:c6166717f7fe0b7da44908c986137ecfeab21f31ec3992f6e128fff8a94be8a5
+      description: The image on which builds will run (default is v1.5.1)
+      name: BUILDER_IMAGE
+      type: string
+    - name: url
+      type: string
+    - default: main
+      name: revision
+      type: string
+    - default: ""
+      name: refspec
+      type: string
+    - default: "true"
+      name: submodules
+      type: string
+    - default: "1"
+      name: depth
+      type: string
+    - default: "true"
+      name: sslVerify
+      type: string
+    - default: ca-bundle.crt
+      name: crtFileName
+      type: string
+    - default: ""
+      name: subdirectory
+      type: string
+    - default: ""
+      name: sparseCheckoutDirectories
+      type: string
+    - default: "true"
+      name: deleteExisting
+      type: string
+    - default: ""
+      name: httpProxy
+      type: string
+    - default: ""
+      name: httpsProxy
+      type: string
+    - default: ""
+      name: noProxy
+      type: string
+    - default: "true"
+      name: verbose
+      type: string
+    - default: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.40.2
+      name: gitInitImage
+      type: string
+    - default: /home/git
+      name: userHome
+      type: string
+    results:
+    - description: Digest of the image just built.
+      name: IMAGE_DIGEST
+      type: string
+    - description: URL of the image just built.
+      name: IMAGE_URL
+      type: string
+    steps:
+    - computeResources: {}
+      env:
+      - name: HOME
+        value: /home/git
+      - name: PARAM_URL
+        value: https://github.com/chitrangpatel/reusable-steps.git
+      - name: PARAM_REVISION
+        value: main
+      - name: PARAM_REFSPEC
+      - name: PARAM_SUBMODULES
+        value: "true"
+      - name: PARAM_DEPTH
+        value: "1"
+      - name: PARAM_SSL_VERIFY
+        value: "true"
+      - name: PARAM_CRT_FILENAME
+        value: ca-bundle.crt
+      - name: PARAM_SUBDIRECTORY
+      - name: PARAM_DELETE_EXISTING
+        value: "true"
+      - name: PARAM_HTTP_PROXY
+      - name: PARAM_HTTPS_PROXY
+      - name: PARAM_NO_PROXY
+      - name: PARAM_VERBOSE
+        value: "true"
+      - name: PARAM_SPARSE_CHECKOUT_DIRECTORIES
+      - name: PARAM_USER_HOME
+        value: /home/git
+      - name: WORKSPACE_OUTPUT_PATH
+        value: /workspace/output
+      - name: WORKSPACE_SSH_DIRECTORY_BOUND
+        value: "false"
+      - name: WORKSPACE_SSH_DIRECTORY_PATH
+      - name: WORKSPACE_BASIC_AUTH_DIRECTORY_BOUND
+        value: "false"
+      - name: WORKSPACE_BASIC_AUTH_DIRECTORY_PATH
+      - name: WORKSPACE_SSL_CA_DIRECTORY_BOUND
+        value: "false"
+      - name: WORKSPACE_SSL_CA_DIRECTORY_PATH
+      image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.40.2
+      name: clone
+      script: |
+        #!/usr/bin/env sh
+        set -eu
+        if [ "${PARAM_VERBOSE}" = "true" ] ; then
+          set -x
+        fi
+        if [ "${WORKSPACE_BASIC_AUTH_DIRECTORY_BOUND}" = "true" ] ; then
+          cp "${WORKSPACE_BASIC_AUTH_DIRECTORY_PATH}/.git-credentials" "${PARAM_USER_HOME}/.git-credentials"
+          cp "${WORKSPACE_BASIC_AUTH_DIRECTORY_PATH}/.gitconfig" "${PARAM_USER_HOME}/.gitconfig"
+          chmod 400 "${PARAM_USER_HOME}/.git-credentials"
+          chmod 400 "${PARAM_USER_HOME}/.gitconfig"
+        fi
+        if [ "${WORKSPACE_SSH_DIRECTORY_BOUND}" = "true" ] ; then
+          cp -R "${WORKSPACE_SSH_DIRECTORY_PATH}" "${PARAM_USER_HOME}"/.ssh
+          chmod 700 "${PARAM_USER_HOME}"/.ssh
+          chmod -R 400 "${PARAM_USER_HOME}"/.ssh/*
+        fi
+        if [ "${WORKSPACE_SSL_CA_DIRECTORY_BOUND}" = "true" ] ; then
+           export GIT_SSL_CAPATH="${WORKSPACE_SSL_CA_DIRECTORY_PATH}"
+           if [ "${PARAM_CRT_FILENAME}" != "" ] ; then
+              export GIT_SSL_CAINFO="${WORKSPACE_SSL_CA_DIRECTORY_PATH}/${PARAM_CRT_FILENAME}"
+           fi
+        fi
+        CHECKOUT_DIR="${WORKSPACE_OUTPUT_PATH}/${PARAM_SUBDIRECTORY}"
+        cleandir() {
+          # Delete any existing contents of the repo directory if it exists.
+          #
+          # We don't just "rm -rf ${CHECKOUT_DIR}" because ${CHECKOUT_DIR} might be "/"
+          # or the root of a mounted volume.
+          if [ -d "${CHECKOUT_DIR}" ] ; then
+            # Delete non-hidden files and directories
+            rm -rf "${CHECKOUT_DIR:?}"/*
+            # Delete files and directories starting with . but excluding ..
+            rm -rf "${CHECKOUT_DIR}"/.[!.]*
+            # Delete files and directories starting with .. plus any other character
+            rm -rf "${CHECKOUT_DIR}"/..?*
+          fi
+        }
+        if [ "${PARAM_DELETE_EXISTING}" = "true" ] ; then
+          cleandir || true
+        fi
+        test -z "${PARAM_HTTP_PROXY}" || export HTTP_PROXY="${PARAM_HTTP_PROXY}"
+        test -z "${PARAM_HTTPS_PROXY}" || export HTTPS_PROXY="${PARAM_HTTPS_PROXY}"
+        test -z "${PARAM_NO_PROXY}" || export NO_PROXY="${PARAM_NO_PROXY}"
+        git config --global --add safe.directory "${WORKSPACE_OUTPUT_PATH}"
+        /ko-app/git-init \
+          -url="${PARAM_URL}" \
+          -revision="${PARAM_REVISION}" \
+          -refspec="${PARAM_REFSPEC}" \
+          -path="${CHECKOUT_DIR}" \
+          -sslVerify="${PARAM_SSL_VERIFY}" \
+          -submodules="${PARAM_SUBMODULES}" \
+          -depth="${PARAM_DEPTH}" \
+          -sparseCheckoutDirectories="${PARAM_SPARSE_CHECKOUT_DIRECTORIES}"
+        cd "${CHECKOUT_DIR}"
+        EXIT_CODE="$?"
+        if [ "${EXIT_CODE}" != 0 ] ; then
+          exit "${EXIT_CODE}"
+        fi
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+    - args:
+      - --dockerfile=./Dockerfile
+      - --context=$(workspaces.source.path)/./
+      - --destination=us-central1-docker.pkg.dev/chitrang-tekton/chitrang/ci
+      - --digest-file=/tekton/results/IMAGE_DIGEST
+      computeResources: {}
+      image: gcr.io/kaniko-project/executor:v1.5.1@sha256:c6166717f7fe0b7da44908c986137ecfeab21f31ec3992f6e128fff8a94be8a5
+      name: build-and-push
+      securityContext:
+        runAsUser: 0
+      workingDir: /workspace/output
+    workspaces:
+    - description: The git repo will be cloned onto the volume backing this Workspace.
+      name: output
+    - name: ssh-directory
+      optional: true
+    - name: basic-auth
+      optional: true
+    - name: ssl-ca-directory
+      optional: true
+    - mountPath: /kaniko/.docker
+      name: dockerconfig
+      optional: true
