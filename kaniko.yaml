@@ -1,0 +1,30 @@
+apiVersion: tekton.dev/v1beta1
+kind: MyStep
+metadata:
+  name: kaniko-build-and-push
+spec:
+  params:
+    - name: IMAGE
+    - name: DOCKERFILE
+    - name: CONTEXT
+    - name: EXTRA_ARGS
+    - name: BUILDER_IMAGE
+  workspaces:
+    - name: source
+    - name: dockerconfig
+  results:
+    - name: IMAGE_DIGEST
+    - name: IMAGE_URL
+  workingDir: $(workspaces.source.path)
+  image: $(params.BUILDER_IMAGE)
+  args:
+    - $(params.EXTRA_ARGS)
+    - --dockerfile=$(params.DOCKERFILE)
+    - --context=$(workspaces.source.path)/$(params.CONTEXT) # The user does not need to care the workspace and the source.
+    - --destination=$(params.IMAGE)
+    - --digest-file=$(results.IMAGE_DIGEST.path)
+  # kaniko assumes it is running as root, which means this example fails on platforms
+  # that default to run containers as random uid (like OpenShift). Adding this securityContext
+  # makes it explicit that it needs to run as root.
+  securityContext:
+    runAsUser: 0

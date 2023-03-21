@@ -1,0 +1,98 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: clone-build-and-push
+spec:
+  workspaces:
+    - name: output
+      description: The git repo will be cloned onto the volume backing this Workspace.
+    - name: ssh-directory
+      optional: true
+    - name: basic-auth
+      optional: true
+    - name: ssl-ca-directory
+      optional: true
+    # kaniko workspaces
+    #- name: source # this is the same as the output workspace required by the clone task.
+    - name: dockerconfig
+      optional: true
+      mountPath: /kaniko/.docker
+  params:
+    - name: IMAGE
+      description: Name (reference) of the image to build.
+    - name: DOCKERFILE
+      description: Path to the Dockerfile to build.
+      default: ./Dockerfile
+    - name: CONTEXT
+      description: The build context used by Kaniko.
+      default: ./
+    - name: EXTRA_ARGS
+      type: array
+      default: []
+    - name: BUILDER_IMAGE
+      description: The image on which builds will run (default is v1.5.1)
+      default: gcr.io/kaniko-project/executor:v1.5.1@sha256:c6166717f7fe0b7da44908c986137ecfeab21f31ec3992f6e128fff8a94be8a5
+    # Clone params
+    - name: url
+    - name: revision
+      default: "main"
+    - name: refspec
+      default: ""
+    - name: submodules
+      default: "true"
+    - name: depth
+      default: "1"
+    - name: sslVerify
+      default: "true"
+    - name: crtFileName
+      default: "ca-bundle.crt"
+    - name: subdirectory
+      default: ""
+    - name: sparseCheckoutDirectories
+      default: ""
+    - name: deleteExisting
+      default: "true"
+    - name: httpProxy
+      default: ""
+    - name: httpsProxy
+      default: ""
+    - name: noProxy
+      default: ""
+    - name: verbose
+      default: "true"
+    - name: gitInitImage
+      default: "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.40.2"
+    - name: userHome
+      default: "/home/git"
+  results:
+    - name: IMAGE_DIGEST
+      description: Digest of the image just built.
+    - name: IMAGE_URL
+      description: URL of the image just built.
+  steps:
+    - name: clone
+      stepRef:
+        name: git-clone
+    - name: build-and-push
+      workspaces:
+        - name: source
+          value: output
+      stepRef:
+        name: kaniko-build-and-push
+---
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: clone-build-and-push-run
+spec:
+  serviceaccountname: chitrangksa
+  workspaces:
+    - name: output
+      emptyDir: { } # can be the default
+  params:
+    - name: url
+      value: https://github.com/chitrangpatel/reusable-steps.git 
+    - name: IMAGE
+      value: us-central1-docker.pkg.dev/chitrang-tekton/chitrang/ci
+  TaskRef:
+    name: clone-build-and-push
